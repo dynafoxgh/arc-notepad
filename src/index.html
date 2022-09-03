@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'" /> -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self';"> -->
+
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data"> -->
+    <meta http-equiv="Content-Security-Policy" content="default-src *;
+   img-src * 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *;
+   style-src  'self' *">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+    <title>Exo Notepad</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- <link rel="stylesheet" href="./css/markdown/markdown-andromeda.css"> -->
+    <link rel="stylesheet" type="text/css" href="css/themes/andromeda.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet"> -->
+</head>
+
+<body>
+    <div id="workspace" style="height: 100%;">
+        <div class="div1" id="code-area">
+            <textarea id="editor" spellcheck="false"></textarea>
+        </div>
+        <div class="div2 markdown" id="preview-area">
+            <div id="startup">
+                <h1>Exo Notepad</h1>
+                <blockquote>Start by opening a file or by typing in the code area</blockquote>
+            </div>
+            <div id="preview" class=" preview">
+
+            </div>
+        </div>
+    </div>
+
+    <script src="js/renderer.js"></script>
+    <script src="js/keys.js"></script>
+</body>
+
+</html>

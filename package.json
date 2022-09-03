@@ -1,0 +1,37 @@
+{
+    "name": "exo-editor",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/main.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "electron ."
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "electron": "^20.0.3"
+    },
+    "dependencies": {
+        "electron-packager": "^15.5.1",
+        "electron-reload": "^2.0.0-alpha.1",
+        "fs": "^0.0.1-security",
+        "highlight.js": "^11.6.0",
+        "html-pdf": "^3.0.1",
+        "markdown-it": "^13.0.1",
+        "markdown-it-abbr": "^1.0.4",
+        "markdown-it-container": "^3.0.0",
+        "markdown-it-deflist": "^2.1.0",
+        "markdown-it-emoji": "^2.0.2",
+        "markdown-it-footnote": "^3.0.3",
+        "markdown-it-highlightjs": "^4.0.1",
+        "markdown-it-ins": "^3.0.1",
+        "markdown-it-mark": "^3.0.1",
+        "markdown-it-sub": "^1.0.0",
+        "markdown-it-sup": "^1.0.0",
+        "markdown-it-task-lists": "^2.1.1",
+        "markdown-pdf": "^11.0.0",
+        "path": "^0.12.7"
+    }
+}
