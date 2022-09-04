@@ -10,8 +10,8 @@
 
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data"> -->
     <meta http-equiv="Content-Security-Policy" content="default-src *;
-   img-src * 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *;
-   style-src  'self' *">
+   img-src * 'self' data: https:; script-src 'self' *;
+   style-src * 'self' 'unsafe-inline' ">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
     <title>Exo Notepad</title>
     <link rel="stylesheet" href="css/style.css">
@@ -25,7 +25,7 @@
 </head>
 
 <body>
-    <div id="workspace" style="height: 100%;">
+    <div id="workspace">
         <div class="div1" id="code-area">
             <textarea id="editor" spellcheck="false"></textarea>
         </div>

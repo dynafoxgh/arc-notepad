@@ -58,7 +58,16 @@ const template = [
 			{
 				type: 'separator',
 			},
-			,
+			{
+				label: 'Print to PDF...',
+				click: async () => {
+					win.webContents.send('toPDF');
+				},
+				accelerator: 'Ctrl+P',
+			},
+			{
+				type: 'separator',
+			},
 			{
 				id: 'closeFile',
 				label: 'Close File',

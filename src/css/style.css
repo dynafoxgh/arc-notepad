@@ -6,6 +6,7 @@ body {
 
 html {
 	overflow-x: hidden;
+	overflow-y: hidden;
 }
 
 body {
@@ -51,6 +52,14 @@ img {
 	display: flex;
 	align-content: center;
 	justify-content: center;
+}
+
+#menu-bar {
+	background-color: #ff0000;
+	color: #ffffff;
+	height: 30px;
+	width: 100%;
+	-webkit-app-region: drag;
 }
 
 #preview {
