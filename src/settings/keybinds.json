@@ -1,0 +1,18 @@
+[
+    {
+        "key": "alt+k",
+        "command": "cursorDown"
+    },
+    {
+        "key": "alt+i",
+        "command": "cursorUp"
+    },
+    {
+        "key": "alt+l",
+        "command": "cursorRight"
+    },
+    {
+        "key": "alt+j",
+        "command": "cursorLeft"
+    }
+]

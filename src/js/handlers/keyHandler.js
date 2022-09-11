@@ -1,5 +1,15 @@
+const ecmds = require(`${__dirname}/js/services/ecmds`);
+
 var movement = false;
 var direction;
+
+const brackets = {
+	'{': '}',
+	'[': ']',
+	'(': ')',
+	"'": "'",
+	'"': '"',
+};
 
 function nextWord(input) {
 	var words = input.value.split(/ |\n/g),
@@ -36,6 +46,22 @@ function getLineNumberAndColumnIndex(textarea) {
 }
 
 editor.addEventListener('keydown', event => {
+	if (/{|\[|\(|'|"/.test(event.key) && !event.ctrlKey && !event.altKey) {
+		editor.setRangeText(brackets[event.key].toString(), editor.selectionStart, editor.selectionEnd, 'start');
+	}
+	if (event.key == 'Backspace') {
+		query = editor.value.substr(editor.selectionStart - 1, 2);
+		console.log(query);
+		if (/{}|\[\]|\(\)|''|""/.test(query)) {
+			event.preventDefault();
+			editor.setRangeText('', editor.selectionStart - 1, editor.selectionEnd + 1, 'start');
+		}
+	}
+	if (event.key == 'Tab') {
+		event.preventDefault();
+
+		editor.setRangeText('    ', editor.selectionStart, editor.selectionEnd, 'end');
+	}
 	if (event.key == 'Alt') {
 		oldSelectionStart = editor.selectionStart;
 		oldSelectionEnd = editor.selectionEnd;
@@ -46,40 +72,11 @@ editor.addEventListener('keydown', event => {
 			if (event.code == 'KeyJ') prevWord(editor);
 			if (event.code == 'KeyL') nextWord(editor);
 		} else if (event.shiftKey) {
-			oldSelectionStart = editor.selectionStart;
-			oldSelectionEnd = editor.selectionEnd;
-			if (editor.selectionStart == editor.selectionEnd) {
-				if (event.code == 'KeyJ') {
-					direction = 'left';
-					editor.setSelectionRange(editor.selectionStart - 1, oldSelectionEnd);
-				}
-				if (event.code == 'KeyL') {
-					direction = 'right';
-					editor.setSelectionRange(oldSelectionStart, editor.selectionEnd + 1);
-				}
-			} else if (direction == 'left') {
-				if (event.code == 'KeyJ') {
-					editor.setSelectionRange(editor.selectionStart - 1, oldSelectionEnd);
-				}
-				if (event.code == 'KeyL') {
-					editor.setSelectionRange(editor.selectionStart + 1, oldSelectionEnd);
-				}
-			} else if (direction == 'right') {
-				if (event.code == 'KeyJ') {
-					editor.setSelectionRange(oldSelectionStart, editor.selectionEnd - 1);
-				}
-				if (event.code == 'KeyL') {
-					editor.setSelectionRange(oldSelectionStart, editor.selectionEnd + 1);
-				}
-			}
+			if (event.code == 'KeyJ') ecmds.cursorLeftSelect();
+			if (event.code == 'KeyL') ecmds.cursorRightSelect();
 		} else {
-			if (direction == 'left') {
-				if (event.code == 'KeyJ') editor.setSelectionRange(editor.selectionStart - 1, editor.selectionStart - 1);
-				if (event.code == 'KeyL') editor.setSelectionRange(editor.selectionStart + 1, editor.selectionStart + 1);
-			} else {
-				if (event.code == 'KeyJ') editor.setSelectionRange(editor.selectionEnd - 1, editor.selectionEnd - 1);
-				if (event.code == 'KeyL') editor.setSelectionRange(editor.selectionEnd + 1, editor.selectionEnd + 1);
-			}
+			if (event.code == 'KeyJ') ecmds.cursorLeft();
+			if (event.code == 'KeyL') ecmds.cursorRight();
 		}
 	} else {
 		movement = false;

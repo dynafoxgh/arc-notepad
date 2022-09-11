@@ -3,11 +3,12 @@ const { app, BrowserWindow, Menu, dialog, ipcMain, ipcRenderer, MenuItem } = req
 const fs = require('fs');
 const path = require('path');
 // const markdownpdf = require('markdown-pdf');
-const pdf = require('html-pdf');
+const { mdToPdf } = require('md-to-pdf');
 
 require('electron-reload')(__dirname);
 let win;
 let file;
+var fileName;
 
 //electron-packager <sourcedir> <appname> --platform=win32 --arch=x86_64
 
@@ -63,6 +64,7 @@ const template = [
 				click: async () => {
 					win.webContents.send('toPDF');
 				},
+				enabled: false,
 				accelerator: 'Ctrl+P',
 			},
 			{
@@ -81,13 +83,6 @@ const template = [
 		],
 	},
 	{ label: 'Edit', role: 'editMenu' },
-	// {
-	// 	label: 'pdf',
-	// 	click: async () => {
-	// 		win.webContents.send('toPDF');
-	// 	},
-	// 	accelerator: 'Ctrl+P',
-	// },
 	{
 		label: 'View',
 		submenu: [
@@ -105,24 +100,17 @@ const template = [
 				},
 				accelerator: 'Ctrl+H',
 			},
-			// {
-			// 	label: 'Preview Size',
-			// 	id: 'previewSize',
-			// 	submenu: [
-			// 		{
-			// 			label: 'Standard',
-			// 			click: async e => {
-			// 				win.webContents.send('previewSize:standard');
-			// 			},
-			// 		},
-			// 		{
-			// 			label: 'A4',
-			// 			click: async e => {
-			// 				win.webContents.send('previewSize:standard');
-			// 			},
-			// 		},
-			// 	],
-			// },
+			{
+				type: 'separator',
+			},
+			{
+				id: 'rerenderPreview',
+				label: 'Refresh Preview',
+				click: async () => {
+					win.webContents.send('rerenderPreview');
+				},
+				accelerator: 'F5',
+			},
 			{
 				type: 'separator',
 			},
@@ -138,7 +126,7 @@ const template = [
 	{
 		label: 'Go',
 		submenu: [
-			{ label: 'Go to Header...', enabled: false },
+			{ id: 'goToHeading', label: 'Go to Heading...', enabled: false, submenu: [] },
 			{ label: 'Go to Line/Column...', enabled: false },
 		],
 	},
@@ -173,7 +161,7 @@ const createWindow = () => {
 		backgroundColor: '#000000',
 		minWidth: 1280,
 		minHeight: 720,
-		useContentSize: true,
+		useContentSize: false,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,
@@ -198,17 +186,19 @@ app.once('ready-to-show', () => {
 
 // IPC FUNCTIONS
 
+var suffix;
 // Function to update window title
 ipcMain.on('updateWindowTitle', (event, { file, ico }) => {
+	fileName = file || fileName;
 	console.log(`file:///${__dirname.replaceAll(`\\`, `/`)}/`);
-	var suffix;
+
 	if (ico == true) {
-		var suffix = '• ';
+		suffix = '● ';
 	} else {
-		var suffix = '';
+		suffix = '';
 	}
-	if (file != '') {
-		win.setTitle(`${suffix}${file} - Exo Notepad`);
+	if (fileName != '') {
+		win.setTitle(`${suffix}${fileName} - Exo Notepad`);
 	} else {
 		win.setTitle(`Exo Notepad`);
 	}
@@ -252,24 +242,26 @@ ipcMain.on('toPDF', async (event, { contents }) => {
 			{ name: 'Other File Types', extensions: ['*'] },
 		],
 	});
-	var options = {
-		format: 'A4',
-	};
 
-	contents
-		.printToPDF(options)
-		.then(data => {
-			fs.writeFile(filePath, data, function (err) {
-				if (err) {
-					console.log(err);
-				} else {
-					console.log('PDF Generated Successfully');
-				}
-			});
-		})
-		.catch(error => {
-			console.log(error);
-		});
+	mdToPdf({ content: contents }, { dest: filePath });
+	// var options = {
+	// 	format: 'A4',
+	// };
+
+	// contents
+	// 	.printToPDF(options)
+	// 	.then(data => {
+	// 		fs.writeFile(filePath, data, function (err) {
+	// 			if (err) {
+	// 				console.log(err);
+	// 			} else {
+	// 				console.log('PDF Generated Successfully');
+	// 			}
+	// 		});
+	// 	})
+	// 	.catch(error => {
+	// 		console.log(error);
+	// 	});
 	// markdownpdf({ cssPath: `css/markdown-test.css` })
 	// 	.from.string(contents)
 	// 	.to(filePath, function () {});

@@ -1,51 +1,46 @@
 const { ipcRenderer, BrowserWindow, remote, dialog } = require('electron');
 const fs = require('fs');
-const hljs = require('highlight.js');
-const pdf = require('html-pdf');
+const hljs = require('highlight.js/lib/core');
+const marked = require('marked');
+// const pdf = require('html-pdf');
+
+// hljs.registerLanguage('js', require('highlight.js/lib/languages/javascript'));
+// hljs.registerLanguage('bash', require('highlight.js/lib/languages/bash'));
 
 // Markdown node module
 var md = require('markdown-it')({
 	html: true,
 	linkify: true,
 	typographer: true,
-	highlight: function (str, lang) {
-		if (lang && hljs.getLanguage(lang)) {
-			try {
-				return hljs.highlight(str, { language: lang }).value;
-			} catch (__) {}
-		}
-
-		return ''; // use external default escaping
-	},
 })
+	.use(require('markdown-it-highlightjs'), { auto: false })
+	.use(require('markdown-it-task-lists'))
+	.use(require('markdown-it-container'))
+	.use(require('markdown-it-footnote'))
+	.use(require('markdown-it-deflist'))
+	.use(require('markdown-it-anchor'))
+	.use(require('markdown-it-emoji'))
+	.use(require('markdown-it-mark'))
+	.use(require('markdown-it-abbr'))
 	.use(require('markdown-it-sub'))
 	.use(require('markdown-it-sup'))
-	.use(require('markdown-it-emoji'))
-	.use(require('markdown-it-ins'))
-	.use(require('markdown-it-footnote'))
-	.use(require('markdown-it-container'))
-	.use(require('markdown-it-mark'))
-	.use(require('markdown-it-deflist'))
-	.use(require('markdown-it-abbr'))
-	.use(require('markdown-it-task-lists'));
-
+	.use(require('markdown-it-ins'));
 md.enable('table');
 
 let openedFilePath;
 const editor = document.getElementById('editor');
-
-//markdown-it-emoji markdown-it-ins markdown-it-footnote markdown-it-container markdown-it-mark markdown-it-deflist markdown-it-abbr
+const preview = document.getElementById('preview');
 
 // Setup for auto update
 var typingTimer;
 var doneTypingInterval = 500;
 var ratio;
+var lastTimeStamp = 0;
+var oldContent;
 
 // Function to update markdown in the preview area
 function updateMarkdown() {
-	// md = new MarkdownIt();
 	var result = md.render(editor.value);
-	// console.log(result);
 
 	document.getElementById('preview').innerHTML = result;
 	document.getElementById('startup').style.display = 'none';
@@ -58,12 +53,20 @@ function updateMarkdown() {
 // IPC FUNCTIONS
 
 const div2 = document.getElementById('preview-area');
-const workspace = document.getElementById('workspace');
+// const workspace = document.getElementById('workspace');
 
 editor.addEventListener('scroll', event => {
-	// console.log(ratio);
-	// div2.removeEventListener('scroll');
-	div2.scrollTop = editor.scrollTop * ratio;
+	if (event.timeStamp - lastTimeStamp > 12) {
+		div2.scrollTop = editor.scrollTop * ratio;
+		lastTimeStamp = event.timeStamp;
+	}
+});
+
+div2.addEventListener('scroll', event => {
+	if (event.timeStamp - lastTimeStamp > 12) {
+		editor.scrollTop = div2.scrollTop / ratio;
+		lastTimeStamp = event.timeStamp;
+	}
 });
 
 // Functions for autoupdating the preview area
@@ -78,6 +81,7 @@ editor.addEventListener('keyup', function () {
 
 function doneTyping() {
 	//
+	if (editor.value != oldContent) ipcRenderer.send('updateWindowTitle', { ico: true });
 	updateMarkdown();
 }
 
@@ -85,28 +89,32 @@ function doneTyping() {
 ipcRenderer.on('fileOpened', (event, { contents, filePath }) => {
 	openedFilePath = filePath;
 	editor.value = contents;
+	oldContent = contents;
 	// editor.style.display = 'block';
 	// document.getElementById('file-path').innerText = filePath;
 	document.getElementsByTagName('title').value = filePath;
 	document.getElementById('startup').style.display = 'none';
 
-	ipcRenderer.send('updateWindowTitle', { file: filePath.split('\\').pop(), ico: false });
-
+	ipcRenderer.send('updateWindowTitle', { file: filePath.split('\\').pop() });
 	updateMarkdown();
-	console.log(document.getElementsByTagName('h2'));
+	// console.log(document.getElementsByTagName('h2'));
 });
 
 // Function to save file if file exists
 ipcRenderer.on('saveFile', event => {
 	const currentTextValue = editor.value;
+	oldContent = currentTextValue;
 	fs.writeFileSync(openedFilePath, currentTextValue, 'utf-8');
+	ipcRenderer.send('updateWindowTitle', { ico: false });
 	// ipcRenderer.send('updateWindowTitle', { file: filePath.split('\\').pop(), ico: false });
 });
 
 // Function to send current contents of the editor to save
 ipcRenderer.on('saveFileAs', event => {
 	const currentTextValue = editor.value;
+	oldContent = currentTextValue;
 	ipcRenderer.send('saveFileAs', { contents: currentTextValue });
+	ipcRenderer.send('updateWindowTitle', { ico: false });
 });
 
 // Function to hide editor
@@ -132,4 +140,8 @@ ipcRenderer.on('closeFile', event => {
 ipcRenderer.on('toPDF', event => {
 	const currentTextValue = editor.value;
 	ipcRenderer.send('toPDF', { contents: currentTextValue });
+});
+
+ipcRenderer.on('rerenderPreview', event => {
+	updateMarkdown();
 });
