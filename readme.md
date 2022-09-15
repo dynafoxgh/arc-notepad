@@ -10,3 +10,4 @@ The UI overhaul will not continue since it is too big of a change. We will conti
 
 - [ ] Improved image importing
 - [ ] Settings menu
+- [ ] Special charater menu
