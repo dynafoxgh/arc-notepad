@@ -5,35 +5,85 @@
     <meta charset="UTF-8" />
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src *;
-   img-src * 'self' data: https:; script-src 'self' *;
+   img-src * 'self' data: https:; script-src * 'self' 'unsafe-inline';
    style-src * 'self' 'unsafe-inline' ">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
     <title>Exo Notepad</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="extra/fontawesome/css/all.css">
     <link rel="stylesheet" type="text/css" href="css/themes/exo.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 
-<body>
-    <div id="workspace">
-        <div class="div1" id="code-area">
-            <textarea id="editor" spellcheck="false"></textarea>
+<body class="light" onload="init()">
+    <div id="windowbar">
+        <div class="menu">
+            <ul>
+                <li>
+                    <a href="#"><i class="fa-light fa-file"></i> &nbspFile
+                    </a>
+                    <ul>
+                        <li><a href="#">Open File</a></li>
+                        <li><a href="#">Close File</a></li>
+                        <li><a href="#">Save File as...</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa-light fa-file-pen"></i> &nbspEdit
+                    </a>
+                    <ul>
+                        <li><a href="#">Front End</a></li>
+                        <li><a href="#">Back End</a></li>
+                        <li>
+                            <a href="#">Others
+                                <i class="fas fa-caret-right"></i>
+                            </a>
+                            <ul>
+                                <li><a href="#">Links</a></li>
+                                <li><a href="#">Works</a></li>
+                                <li><a href="#">Status</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li><a href="#"><i class="fa-light fa-eye"></i> &nbspView</a></li>
+                <li><a href="#">Feedback</a></li>
+            </ul>
         </div>
-        <div class="div2 markdown" id="preview-area">
-            <div id="startup">
-                <h1>Exo Notepad</h1>
-                <blockquote>Start by opening a file or by typing in the code area</blockquote>
-            </div>
-            <div id="preview" class=" preview">
 
+    </div>
+    <div id="workspace">
+        <div id="toolbar-area">
+            <div id="default-toolbar" class="toolbar">
+                <ul>
+                    <li>
+                        <p><i class="fa-regular fa-text"></i></p>
+                    </li>
+                    <li>
+                        <p><i class="fa-regular fa-pen-line"></i></p>
+                    </li>
+                    <li>
+                        <p><i class="fa-regular fa-circle"></i></p>
+                    </li>
+                    <li>
+                        <p><i class="fa-regular fa-square"></i></p>
+                    </li>
+                    <li>
+                        <input type="color" name="color" id="toolbar-default-color">
+                    </li>
+                    <li>
+                        <input type="number" name="linewidth" id="toolbar-default-linewidth" value="2">
+                    </li>
+                </ul>
             </div>
         </div>
+        <canvas id="editor"></canvas>
     </div>
 
     <script src="js/renderer.js"></script>
-    <script src="js/handlers/keyHandler.js"></script>
+    <script src="js/handlers/keyHandler.js" defer></script>
 </body>
 
 </html>

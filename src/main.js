@@ -168,6 +168,12 @@ const createWindow = () => {
 		},
 		show: false,
 		icon: path.join(__dirname, 'favicon.ico'),
+		titleBarStyle: 'hidden',
+		titleBarOverlay: {
+			color: '#fff',
+			symbolColor: '#111',
+			height: 32,
+		},
 	});
 	win.loadFile(path.join(__dirname, 'index.html'));
 	// win.webContents.openDevTools();
@@ -182,95 +188,4 @@ app.whenReady().then(() => {
 
 app.once('ready-to-show', () => {
 	win.show();
-});
-
-// IPC FUNCTIONS
-
-var suffix;
-// Function to update window title
-ipcMain.on('updateWindowTitle', (event, { file, ico }) => {
-	fileName = file || fileName;
-	console.log(`file:///${__dirname.replaceAll(`\\`, `/`)}/`);
-
-	if (ico == true) {
-		suffix = '● ';
-	} else {
-		suffix = '';
-	}
-	if (fileName != '') {
-		win.setTitle(`${suffix}${fileName} - Exo Notepad`);
-	} else {
-		win.setTitle(`Exo Notepad`);
-	}
-});
-
-// Function to save file as...
-ipcMain.on('saveFileAs', async (event, { contents }) => {
-	console.log(contents);
-	const { filePath } = await dialog.showSaveDialog({
-		filters: [
-			{ name: 'Valid File Types', extensions: ['enp', 'txt', 'md'] },
-			{ name: 'Other File Types', extensions: ['*'] },
-		],
-	});
-
-	if (filePath === undefined) {
-		return;
-	} else {
-		fs.writeFile(filePath, contents.toString(), function (err) {
-			console.log(err);
-			if (err === undefined || err === null) {
-				menu.getMenuItemById('saveFile').enabled = true;
-				dialog.showMessageBox({
-					title: 'Save Succesfull!',
-					message: 'The file has been succesfully saved!',
-					// icon: path.join(__dirname, 'favicon.ico'),
-					buttons: ['OK'],
-				});
-				win.webContents.send('fileOpened', { contents, filePath });
-			} else {
-				dialog.showErrorBox('File save error', err.message);
-			}
-		});
-	}
-});
-
-ipcMain.on('toPDF', async (event, { contents }) => {
-	const { filePath } = await dialog.showSaveDialog({
-		filters: [
-			{ name: 'PDF', extensions: ['pdf'] },
-			{ name: 'Other File Types', extensions: ['*'] },
-		],
-	});
-
-	mdToPdf({ content: contents }, { dest: filePath });
-	// var options = {
-	// 	format: 'A4',
-	// };
-
-	// contents
-	// 	.printToPDF(options)
-	// 	.then(data => {
-	// 		fs.writeFile(filePath, data, function (err) {
-	// 			if (err) {
-	// 				console.log(err);
-	// 			} else {
-	// 				console.log('PDF Generated Successfully');
-	// 			}
-	// 		});
-	// 	})
-	// 	.catch(error => {
-	// 		console.log(error);
-	// 	});
-	// markdownpdf({ cssPath: `css/markdown-test.css` })
-	// 	.from.string(contents)
-	// 	.to(filePath, function () {});
-
-	// const base = path.resolve('./src').replace(/\\/g, '/');
-	// console.log(base);
-
-	// pdf.create(contents, options).toFile(filePath, function (err, res) {
-	// 	if (err) return console.log(err);
-	// 	console.log(res); // { filename: '/app/businesscard.pdf' }
-	// });
 });

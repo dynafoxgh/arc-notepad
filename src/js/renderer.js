@@ -1,147 +1,155 @@
 const { ipcRenderer, BrowserWindow, remote, dialog } = require('electron');
-const fs = require('fs');
-const hljs = require('highlight.js/lib/core');
-const marked = require('marked');
-// const pdf = require('html-pdf');
+const defaultToolbar = document.getElementById('default-toolbar');
 
-// hljs.registerLanguage('js', require('highlight.js/lib/languages/javascript'));
-// hljs.registerLanguage('bash', require('highlight.js/lib/languages/bash'));
+// const editor = document.getElementById('editor');
+console.log(document.getElementById('editor'));
 
-// Markdown node module
-var md = require('markdown-it')({
-	html: true,
-	linkify: true,
-	typographer: true,
-})
-	.use(require('markdown-it-highlightjs'), { auto: false })
-	.use(require('markdown-it-task-lists'))
-	.use(require('markdown-it-container'))
-	.use(require('markdown-it-footnote'))
-	.use(require('markdown-it-deflist'))
-	.use(require('markdown-it-anchor'))
-	.use(require('markdown-it-emoji'))
-	.use(require('markdown-it-mark'))
-	.use(require('markdown-it-abbr'))
-	.use(require('markdown-it-sub'))
-	.use(require('markdown-it-sup'))
-	.use(require('markdown-it-ins'));
-md.enable('table');
+var canvas,
+	ctx,
+	flag = false,
+	prevX = 0,
+	currX = 0,
+	prevY = 0,
+	currY = 0,
+	dot_flag = false;
 
-let openedFilePath;
-const editor = document.getElementById('editor');
-const preview = document.getElementById('preview');
+// var x = 'black',
+var y = 2;
 
-// Setup for auto update
-var typingTimer;
-var doneTypingInterval = 500;
-var ratio;
-var lastTimeStamp = 0;
-var oldContent;
-
-// Function to update markdown in the preview area
-function updateMarkdown() {
-	var result = md.render(editor.value);
-
-	document.getElementById('preview').innerHTML = result;
-	document.getElementById('startup').style.display = 'none';
-	ratio =
-		(div2.scrollHeight - div2.clientHeight) /
-		(editor.scrollHeight - editor.clientHeight) /*  + (div2.scrollHeight / div2.clientHeight) */;
-	// console.log(ratio);
-}
-
-// IPC FUNCTIONS
-
-const div2 = document.getElementById('preview-area');
-// const workspace = document.getElementById('workspace');
-
-editor.addEventListener('scroll', event => {
-	if (event.timeStamp - lastTimeStamp > 12) {
-		div2.scrollTop = editor.scrollTop * ratio;
-		lastTimeStamp = event.timeStamp;
+defaultToolbar.addEventListener('change', e => {
+	if (e.target.id === 'toolbar-default-color') {
+		ctx.strokeStyle = e.target.value;
+	}
+	if (e.target.id === 'toolbar-default-linewidth') {
+		ctx.strokeWidth = e.target.value;
 	}
 });
 
-div2.addEventListener('scroll', event => {
-	if (event.timeStamp - lastTimeStamp > 12) {
-		editor.scrollTop = div2.scrollTop / ratio;
-		lastTimeStamp = event.timeStamp;
-	}
-});
+function init() {
+	canvas = document.getElementById('editor');
+	ctx = canvas.getContext('2d');
 
-// Functions for autoupdating the preview area
-editor.addEventListener('change', event => {
-	updateMarkdown();
-});
+	ctx.imageSmoothingQuality = 'high';
 
-editor.addEventListener('keyup', function () {
-	clearTimeout(typingTimer);
-	typingTimer = setTimeout(doneTyping, doneTypingInterval);
-});
+	canvas.style.width = '100%';
+	canvas.style.height = '100%';
+	// ...then set the internal size to match
+	canvas.width = canvas.offsetWidth;
+	canvas.height = canvas.offsetHeight;
+	w = canvas.width;
+	h = canvas.height;
 
-function doneTyping() {
-	//
-	if (editor.value != oldContent) ipcRenderer.send('updateWindowTitle', { ico: true });
-	updateMarkdown();
+	canvas.addEventListener(
+		'mousemove',
+		function (e) {
+			findxy('move', e);
+		},
+		false
+	);
+	canvas.addEventListener(
+		'mousedown',
+		function (e) {
+			findxy('down', e);
+			console.log(ctx);
+		},
+		false
+	);
+	canvas.addEventListener(
+		'mouseup',
+		function (e) {
+			findxy('up', e);
+		},
+		false
+	);
+	canvas.addEventListener(
+		'mouseout',
+		function (e) {
+			findxy('out', e);
+		},
+		false
+	);
 }
 
-// Communication with the main.js file
-ipcRenderer.on('fileOpened', (event, { contents, filePath }) => {
-	openedFilePath = filePath;
-	editor.value = contents;
-	oldContent = contents;
-	// editor.style.display = 'block';
-	// document.getElementById('file-path').innerText = filePath;
-	document.getElementsByTagName('title').value = filePath;
-	document.getElementById('startup').style.display = 'none';
+function color(obj) {
+	switch (obj.id) {
+		case 'green':
+			x = 'green';
+			break;
+		case 'blue':
+			x = 'blue';
+			break;
+		case 'red':
+			x = 'red';
+			break;
+		case 'yellow':
+			x = 'yellow';
+			break;
+		case 'orange':
+			x = 'orange';
+			break;
+		case 'black':
+			x = 'black';
+			break;
+		case 'white':
+			x = 'white';
+			break;
+	}
+	if (x == 'white') y = 14;
+	else y = 2;
+}
 
-	ipcRenderer.send('updateWindowTitle', { file: filePath.split('\\').pop() });
-	updateMarkdown();
-	// console.log(document.getElementsByTagName('h2'));
-});
+function draw() {
+	ctx.beginPath();
+	ctx.moveTo(prevX, prevY);
+	ctx.lineTo(currX, currY);
+	// ctx.strokeStyle = x;
+	// ctx.lineWidth = y;
+	ctx.stroke();
+	ctx.closePath();
+}
 
-// Function to save file if file exists
-ipcRenderer.on('saveFile', event => {
-	const currentTextValue = editor.value;
-	oldContent = currentTextValue;
-	fs.writeFileSync(openedFilePath, currentTextValue, 'utf-8');
-	ipcRenderer.send('updateWindowTitle', { ico: false });
-	// ipcRenderer.send('updateWindowTitle', { file: filePath.split('\\').pop(), ico: false });
-});
+function erase() {
+	var m = confirm('Want to clear');
+	if (m) {
+		ctx.clearRect(0, 0, w, h);
+		document.getElementById('canvasimg').style.display = 'none';
+	}
+}
 
-// Function to send current contents of the editor to save
-ipcRenderer.on('saveFileAs', event => {
-	const currentTextValue = editor.value;
-	oldContent = currentTextValue;
-	ipcRenderer.send('saveFileAs', { contents: currentTextValue });
-	ipcRenderer.send('updateWindowTitle', { ico: false });
-});
+function save() {
+	document.getElementById('canvasimg').style.border = '2px solid';
+	var dataURL = canvas.toDataURL();
+	document.getElementById('canvasimg').src = dataURL;
+	document.getElementById('canvasimg').style.display = 'inline';
+}
 
-// Function to hide editor
-ipcRenderer.on('hideEditor', event => {
-	document.getElementById('code-area').style.display = 'none';
-	document.getElementById('workspace').style.gap = 0;
-});
+function findxy(res, e) {
+	if (res == 'down') {
+		prevX = currX;
+		prevY = currY;
+		currX = e.clientX - canvas.offsetLeft;
+		currY = e.clientY - canvas.offsetTop;
 
-// Function to unhide editor
-ipcRenderer.on('showEditor', event => {
-	document.getElementById('code-area').style.display = 'block';
-	document.getElementById('workspace').style.gap = '32px';
-});
-
-// Function to run when a file is closed
-ipcRenderer.on('closeFile', event => {
-	editor.value = '';
-	updateMarkdown();
-	document.getElementById('startup').style.display = 'block';
-	ipcRenderer.send('updateWindowTitle', { file: '', ico: false });
-});
-
-ipcRenderer.on('toPDF', event => {
-	const currentTextValue = editor.value;
-	ipcRenderer.send('toPDF', { contents: currentTextValue });
-});
-
-ipcRenderer.on('rerenderPreview', event => {
-	updateMarkdown();
-});
+		flag = true;
+		dot_flag = true;
+		if (dot_flag) {
+			ctx.beginPath();
+			// ctx.fillStyle = x;
+			ctx.fillRect(currX, currY, 2, 2);
+			ctx.closePath();
+			dot_flag = false;
+		}
+	}
+	if (res == 'up' || res == 'out') {
+		flag = false;
+	}
+	if (res == 'move') {
+		if (flag) {
+			prevX = currX;
+			prevY = currY;
+			currX = e.clientX - canvas.offsetLeft;
+			currY = e.clientY - canvas.offsetTop;
+			draw();
+		}
+	}
+}
