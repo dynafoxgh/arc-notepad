@@ -1,15 +1,20 @@
-const ecmds = require(`${__dirname}/js/services/ecmds`);
+const { keyMap, menuTemplate, bracketPairs } = require(`${__dirname}\\js\\exports\\export.defaults.js`);
+
+function generateMenu(menuTemplate) {
+	menuTemplate.forEach(element => {
+		if (element.accelerator != undefined) {
+			keyMap[element.accelerator] = element.click;
+		}
+		if (element.submenu != undefined) {
+			this.generateMenu(element.submenu);
+		}
+	});
+}
+
+generateMenu(menuTemplate);
 
 var movement = false;
 var direction;
-
-const brackets = {
-	'{': '}',
-	'[': ']',
-	'(': ')',
-	"'": "'",
-	'"': '"',
-};
 
 function nextWord(input) {
 	var words = input.value.split(/ |\n/g),
@@ -46,12 +51,24 @@ function getLineNumberAndColumnIndex(textarea) {
 }
 
 editor.addEventListener('keydown', event => {
+	// console.log(event);
+	// console.log(`${event.ctrlKey}+${event.shiftKey}+${event.altKey}+${event.code}`);
+	if (event.location == 0) {
+		var output = '';
+		if (event.ctrlKey) output = output + 'Ctrl+';
+		if (event.shiftKey) output = output + 'Shift+';
+		if (event.altKey) output = output + 'Alt+';
+		output = output + event.key.toUpperCase();
+
+		if (keyMap[output]) {
+			keyMap[output]();
+		}
+	}
 	if (/{|\[|\(|'|"/.test(event.key) && !event.ctrlKey && !event.altKey) {
-		editor.setRangeText(brackets[event.key].toString(), editor.selectionStart, editor.selectionEnd, 'start');
+		editor.setRangeText(bracketPairs[event.key].toString(), editor.selectionStart, editor.selectionEnd, 'start');
 	}
 	if (event.key == 'Backspace') {
 		query = editor.value.substr(editor.selectionStart - 1, 2);
-		console.log(query);
 		if (/{}|\[\]|\(\)|''|""/.test(query)) {
 			event.preventDefault();
 			editor.setRangeText('', editor.selectionStart - 1, editor.selectionEnd + 1, 'start');

@@ -11,28 +11,42 @@
     <title>Exo Notepad</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/themes/exo.css">
+    <link rel="stylesheet" href="extra/fontawesome/css/all.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 
-<body>
-    <div id="workspace">
-        <div class="div1" id="code-area">
-            <textarea id="editor" spellcheck="false"></textarea>
+<body class="light">
+    <div id="windowbar">
+        <div class="menu">
+            <ul id="test">
+            </ul>
         </div>
-        <div class="div2 markdown" id="preview-area">
+        <div id="title">
+            Arcbook
+        </div>
+
+
+    </div>
+    <div id="workspace">
+        <div id="code-area">
+            <textarea id="editor" spellcheck="false"
+                placeholder="Start by typing here or by opening a file..."></textarea>
+        </div>
+        <div class="markdown default" id="preview-area">
             <div id="startup">
-                <h1>Exo Notepad</h1>
+                <h1>Arcbook</h1>
                 <blockquote>Start by opening a file or by typing in the code area</blockquote>
             </div>
-            <div id="preview" class=" preview">
+            <div id="preview" class="preview">
 
             </div>
         </div>
     </div>
 
     <script src="js/renderer.js"></script>
+    <!-- <script src="js/interface.js"></script> -->
     <script src="js/handlers/keyHandler.js"></script>
 </body>
 

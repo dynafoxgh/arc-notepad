@@ -9,158 +9,17 @@ require('electron-reload')(__dirname);
 let win;
 let file;
 var fileName;
+var currentfilePath;
 
 //electron-packager <sourcedir> <appname> --platform=win32 --arch=x86_64
-
-// Menu Template
-const template = [
-	{
-		label: 'File',
-		submenu: [
-			{
-				label: 'Open File',
-				click: async () => {
-					const { filePaths } = await dialog.showOpenDialog({
-						properties: ['openFile'],
-						filters: [
-							{ name: 'Valid File Types', extensions: ['enp', 'txt', 'md'] },
-							{ name: 'Other File Types', extensions: ['*'] },
-						],
-					});
-					file = filePaths[0];
-					const contents = fs.readFileSync(file, 'utf-8');
-					// console.log(contents);
-					win.webContents.send('fileOpened', { contents, filePath: file });
-					menu.getMenuItemById('saveFile').enabled = true;
-					win.webContents.send('showEditor');
-				},
-				accelerator: 'Ctrl+O',
-			},
-			{
-				type: 'separator',
-			},
-			{
-				id: 'saveFile',
-				label: 'Save File',
-				click: async () => {
-					win.webContents.send('saveFile');
-				},
-				enabled: false,
-				accelerator: 'Ctrl+S',
-			},
-			{
-				id: 'saveFileAs',
-				label: 'Save As...',
-				click: async () => {
-					win.webContents.send('saveFileAs');
-				},
-				accelerator: 'Ctrl+Shift+S',
-			},
-			{
-				type: 'separator',
-			},
-			{
-				label: 'Print to PDF...',
-				click: async () => {
-					win.webContents.send('toPDF');
-				},
-				enabled: false,
-				accelerator: 'Ctrl+P',
-			},
-			{
-				type: 'separator',
-			},
-			{
-				id: 'closeFile',
-				label: 'Close File',
-				click: async () => {
-					win.webContents.send('closeFile');
-					win.webContents.send('hideEditor');
-					menu.getMenuItemById('saveFile').enabled = false;
-				},
-				accelerator: 'Ctrl+F4',
-			},
-		],
-	},
-	{ label: 'Edit', role: 'editMenu' },
-	{
-		label: 'View',
-		submenu: [
-			{
-				id: 'showEditor',
-				label: 'Show Editor',
-				type: 'checkbox',
-				checked: true,
-				click: async e => {
-					if (e.checked) {
-						win.webContents.send('showEditor');
-					} else {
-						win.webContents.send('hideEditor');
-					}
-				},
-				accelerator: 'Ctrl+H',
-			},
-			{
-				type: 'separator',
-			},
-			{
-				id: 'rerenderPreview',
-				label: 'Refresh Preview',
-				click: async () => {
-					win.webContents.send('rerenderPreview');
-				},
-				accelerator: 'F5',
-			},
-			{
-				type: 'separator',
-			},
-			{
-				label: 'Open Dev Tools',
-				click: async () => {
-					win.webContents.openDevTools();
-				},
-				accelerator: 'Ctrl+Shift+I',
-			},
-		],
-	},
-	{
-		label: 'Go',
-		submenu: [
-			{ id: 'goToHeading', label: 'Go to Heading...', enabled: false, submenu: [] },
-			{ label: 'Go to Line/Column...', enabled: false },
-		],
-	},
-	{
-		label: 'Help',
-		submenu: [
-			{ label: 'Markdown Documentation', enabled: false },
-			{ type: 'separator' },
-			{
-				label: 'About',
-				click: async () => {
-					dialog.showMessageBox({
-						type: 'info',
-						title: 'Exo Notepad',
-						message: 'Exo Notepad',
-						detail: 'Version: 0.1.0',
-					});
-					menu.getMenuItemById('saveFile').enabled = false;
-				},
-			},
-		],
-	},
-];
-
-const menu = Menu.buildFromTemplate(template);
-Menu.setApplicationMenu(menu);
 
 // Create Window
 const createWindow = () => {
 	win = new BrowserWindow({
-		name: 'Exo Notepad',
+		name: 'Arcbook',
 		backgroundColor: '#000000',
-		minWidth: 1280,
-		minHeight: 720,
+		// minWidth: 1280,
+		// minHeight: 720,
 		useContentSize: false,
 		webPreferences: {
 			nodeIntegration: true,
@@ -168,10 +27,16 @@ const createWindow = () => {
 		},
 		show: false,
 		icon: path.join(__dirname, 'favicon.ico'),
+		titleBarStyle: 'hidden',
+		titleBarOverlay: {
+			color: '#fff',
+			symbolColor: '#111',
+			height: 30,
+		},
 	});
 	win.loadFile(path.join(__dirname, 'index.html'));
 	// win.webContents.openDevTools();
-	win.setTitle('Exo Notepad');
+	win.setTitle('Arcbook');
 };
 
 app.whenReady().then(() => {
@@ -187,26 +52,33 @@ app.once('ready-to-show', () => {
 // IPC FUNCTIONS
 
 var suffix;
-// Function to update window title
-ipcMain.on('updateWindowTitle', (event, { file, ico }) => {
-	fileName = file || fileName;
-	console.log(`file:///${__dirname.replaceAll(`\\`, `/`)}/`);
 
-	if (ico == true) {
-		suffix = '● ';
+ipcMain.handle('openFile', async e => {
+	const { filePaths } = await dialog.showOpenDialog({
+		properties: ['openFile'],
+		filters: [
+			{ name: 'Valid File Types', extensions: ['enp', 'txt', 'md'] },
+			{ name: 'Other File Types', extensions: ['*'] },
+		],
+	});
+	file = filePaths[0];
+	currentfilePath = file;
+	const contents = fs.readFileSync(file, 'utf-8');
+	return contents;
+});
+
+ipcMain.handle('saveFile', async (e, contents) => {
+	if (currentfilePath === undefined) {
+		return false;
 	} else {
-		suffix = '';
-	}
-	if (fileName != '') {
-		win.setTitle(`${suffix}${fileName} - Exo Notepad`);
-	} else {
-		win.setTitle(`Exo Notepad`);
+		fs.writeFile(currentfilePath, contents.toString(), function (err) {
+			console.log(err);
+			return true;
+		});
 	}
 });
 
-// Function to save file as...
-ipcMain.on('saveFileAs', async (event, { contents }) => {
-	console.log(contents);
+ipcMain.handle('saveFileAs', async (e, contents) => {
 	const { filePath } = await dialog.showSaveDialog({
 		filters: [
 			{ name: 'Valid File Types', extensions: ['enp', 'txt', 'md'] },
@@ -214,63 +86,41 @@ ipcMain.on('saveFileAs', async (event, { contents }) => {
 		],
 	});
 
-	if (filePath === undefined) {
-		return;
+	if (!filePath) {
+		return false;
 	} else {
 		fs.writeFile(filePath, contents.toString(), function (err) {
 			console.log(err);
 			if (err === undefined || err === null) {
-				menu.getMenuItemById('saveFile').enabled = true;
 				dialog.showMessageBox({
 					title: 'Save Succesfull!',
 					message: 'The file has been succesfully saved!',
 					// icon: path.join(__dirname, 'favicon.ico'),
 					buttons: ['OK'],
 				});
-				win.webContents.send('fileOpened', { contents, filePath });
+				return true;
 			} else {
 				dialog.showErrorBox('File save error', err.message);
+				return false;
 			}
 		});
+		return true;
 	}
 });
 
-ipcMain.on('toPDF', async (event, { contents }) => {
-	const { filePath } = await dialog.showSaveDialog({
-		filters: [
-			{ name: 'PDF', extensions: ['pdf'] },
-			{ name: 'Other File Types', extensions: ['*'] },
-		],
-	});
+ipcMain.handle('closeFile', e => {
+	currentfilePath = undefined;
+});
 
-	mdToPdf({ content: contents }, { dest: filePath });
-	// var options = {
-	// 	format: 'A4',
-	// };
+ipcMain.handle('getFilePath', async e => {
+	return currentfilePath;
+});
 
-	// contents
-	// 	.printToPDF(options)
-	// 	.then(data => {
-	// 		fs.writeFile(filePath, data, function (err) {
-	// 			if (err) {
-	// 				console.log(err);
-	// 			} else {
-	// 				console.log('PDF Generated Successfully');
-	// 			}
-	// 		});
-	// 	})
-	// 	.catch(error => {
-	// 		console.log(error);
-	// 	});
-	// markdownpdf({ cssPath: `css/markdown-test.css` })
-	// 	.from.string(contents)
-	// 	.to(filePath, function () {});
+ipcMain.on('updateRatio', async e => {
+	// await new Promise(resolve => setTimeout(resolve, 1000));
+	win.webContents.send('updateRatio');
+});
 
-	// const base = path.resolve('./src').replace(/\\/g, '/');
-	// console.log(base);
-
-	// pdf.create(contents, options).toFile(filePath, function (err, res) {
-	// 	if (err) return console.log(err);
-	// 	console.log(res); // { filename: '/app/businesscard.pdf' }
-	// });
+ipcMain.on('updateWindowTitle', (event, title) => {
+	win.setTitle(title);
 });

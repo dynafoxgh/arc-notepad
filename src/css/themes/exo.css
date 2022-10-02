@@ -1,5 +1,16 @@
-body {
-	background-color: #20232b;
+:root {
+	/* colors */
+	--blue-0: #007acc;
+}
+
+.default {
+	--links: var(--blue-0);
+	--mark: #cca70077;
+	--text: #20232b;
+	--table-heading: #20232b;
+	--table-second-child: #23262e;
+	--table-text: #c9d1d9;
+	--blockquote: #4d4f55;
 }
 
 .markdown {
@@ -7,14 +18,23 @@ body {
 	-ms-text-size-adjust: 100%;
 	-webkit-text-size-adjust: 100%;
 	margin: 0;
-	color: #ffffff;
-	background-color: #23262e;
-	font-family: -apple-system, BlinkMacSystemFont, 'Poppins', 'Segoe UI', Helvetica, Arial, sans-serif,
-		/* 'Apple Color Emoji',
-		'Segoe UI Emoji' */;
+	font-family: -apple-system, BlinkMacSystemFont, 'Poppins', 'Segoe UI', Helvetica, Arial, sans-serif;
+	/* font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; */
+	/* 'Apple Color Emoji'
+		'Segoe UI Emoji' */
 	font-size: 16px;
 	line-height: 1.5;
 	word-wrap: break-word;
+}
+
+.markdown::-webkit-scrollbar-thumb {
+	background: #0004;
+	/* background: red; */
+	border-radius: 0.25em;
+}
+.markdown::-webkit-scrollbar-thumb:hover {
+	background: #0002;
+	cursor: pointer;
 }
 
 .markdown .octicon {
@@ -54,7 +74,7 @@ body {
 
 .markdown a {
 	background-color: transparent;
-	color: #79c0ff;
+	color: var(--links);
 	text-decoration: none;
 }
 
@@ -82,13 +102,12 @@ body {
 	font-weight: 600;
 	padding-bottom: 0.3em;
 	font-size: 2em;
-	border-bottom: 1px solid #2e323d;
+	border-bottom: 1px solid var(--text);
 }
 
 .markdown mark {
 	/* background-color: rgba(187, 128, 9, 0.15); */
-	background-color: #cca70077;
-	color: #ffffff;
+	background-color: var(--mark);
 }
 
 .markdown small {
@@ -115,7 +134,7 @@ body {
 	border-style: none;
 	max-width: 100%;
 	box-sizing: content-box;
-	background-color: #0d1117;
+	/* background-color: #0d1117; */
 }
 
 .markdown code,
@@ -124,6 +143,7 @@ body {
 .markdown samp {
 	font-family: monospace, monospace;
 	font-size: 1em;
+	color: var(--table-text);
 }
 
 .markdown figure {
@@ -134,11 +154,11 @@ body {
 	box-sizing: content-box;
 	overflow: hidden;
 	background: transparent;
-	border-bottom: 1px solid #21262d;
+	border-bottom: 1px solid var(--blockquote);
 	height: 0.25em;
 	padding: 0;
 	margin: 24px 0;
-	background-color: #30363d;
+	background-color: var(--blockquote);
 	border: 0;
 }
 
@@ -218,11 +238,13 @@ body {
 
 .markdown table {
 	border-spacing: 0;
-	border-collapse: collapse;
+	/* border-collapse: collapse; */
+	border-radius: 6px;
 	display: block;
 	width: max-content;
 	max-width: 100%;
 	overflow: auto;
+	color: var(--table-text);
 }
 
 .markdown td,
@@ -268,7 +290,7 @@ body {
 	font-weight: 600;
 	padding-bottom: 0.3em;
 	font-size: 1.5em;
-	border-bottom: 1px solid #2e323d;
+	border-bottom: 1px solid var(--text);
 }
 
 .markdown h3 {
@@ -300,8 +322,8 @@ body {
 .markdown blockquote {
 	margin: 0;
 	padding: 0 1em;
-	color: #8b949e;
-	border-left: 0.25em solid #30363d;
+	color: var(--blockquote);
+	border-left: 0.25em solid var(--blockquote);
 }
 
 .markdown ul,
@@ -672,16 +694,16 @@ body {
 .markdown table th,
 .markdown table td {
 	padding: 6px 13px;
-	border: 1px solid #2e323d;
+	/* border: 1px solid #cecece; */
 }
 
 .markdown table tr {
-	background-color: #20232b;
+	background-color: var(--table-heading);
 	border-top: 1px solid #2e323d;
 }
 
 .markdown table tr:nth-child(2n) {
-	background-color: #23262e;
+	background-color: var(--table-second-child);
 }
 
 .markdown table img {
@@ -902,7 +924,7 @@ body {
 	left: -24px;
 	pointer-events: none;
 	content: '';
-	border: 2px solid #06c4c7;
+	border: 2px solid var(--blue-0);
 	border-radius: 6px;
 }
 
@@ -1037,3 +1059,84 @@ pre code.hljs {
 	color: #ffdcd7;
 	background-color: #67060c;
 }
+
+/*
+#007acc;
+#2e323d;
+#cca70077;
+#ffffff;
+#0d1117;
+#21262d;
+#30363d;
+#c9d1d9;
+#161b22;
+#2e323d;
+#8b949e;
+#8b949e;
+#30363d;
+#484f58;
+#8b949e;
+#79c0ff;
+#d2a8ff;
+#c9d1d9;
+#7ee787;
+#ff7b72;
+#a5d6ff;
+#ffa657;
+#f85149;
+#f0f6fc;
+#8e1519;
+#f0f6fc;
+#b62324;
+#7ee787;
+#f2cc60;
+#06c4c7;
+#c9d1d9;
+#c9d1d9;
+#ffdcd7;
+#67060c;
+#aff5b4;
+#033a16;
+#ffdfb6;
+#5a1e02;
+#c9d1d9;
+#1158c7;
+#d2a8ff;
+#8b949e;
+#484f58;
+#a5d6ff;
+#f85149;
+#c9d1d9;
+#2e323d;
+#20232b;
+#2e323d;
+#23262e;
+#30363d;
+#c9d1d9;
+#20232b;
+#20232b;
+#0d1117;
+#161b22;
+#8b949e;
+#30363d;
+#06c4c7;
+#c9d1d9;
+#c9d1d9;
+#0d1117;
+#ff7b72;
+#d2a8ff;
+#79c0ff;
+#a5d6ff;
+#ffa657;
+#8b949e;
+#7ee787;
+#c9d1d9;
+#1f6feb;
+#f2cc60;
+#c9d1d9;
+#c9d1d9;
+#aff5b4;
+#033a16;
+#ffdcd7;
+#67060c;
+*/
