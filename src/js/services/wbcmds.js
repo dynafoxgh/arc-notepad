@@ -104,6 +104,6 @@ exports.updateWindowTitle = async (filename, indicator) => {
 	} else {
 		indicator = '';
 	}
-	ipcRenderer.send('updateWindowTitle', `${indicator}${filename} - Arcbook`);
-	document.getElementById('title').innerHTML = `${indicator}${filename} - Arcbook`;
+	ipcRenderer.send('updateWindowTitle', `${indicator}${filename} - Arc Notepad`);
+	document.getElementById('title').innerHTML = `${indicator}${filename} - Arc Notepad`;
 };

@@ -16,7 +16,7 @@ var currentfilePath;
 // Create Window
 const createWindow = () => {
 	win = new BrowserWindow({
-		name: 'Arcbook',
+		name: 'Arc Notepad',
 		backgroundColor: '#000000',
 		// minWidth: 1280,
 		// minHeight: 720,
@@ -36,7 +36,7 @@ const createWindow = () => {
 	});
 	win.loadFile(path.join(__dirname, 'index.html'));
 	// win.webContents.openDevTools();
-	win.setTitle('Arcbook');
+	win.setTitle('Arc Notepad');
 };
 
 app.whenReady().then(() => {

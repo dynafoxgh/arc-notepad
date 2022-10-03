@@ -33,14 +33,14 @@ const previewArea = document.getElementById('preview-area');
 // const workspace = document.getElementById('workspace');
 
 editor.addEventListener('scroll', event => {
-	if (event.timeStamp - lastTimeStamp > 12) {
+	if (event.timeStamp - lastTimeStamp > 15) {
 		previewArea.scrollTop = editor.scrollTop * ratio;
 		lastTimeStamp = event.timeStamp;
 	}
 });
 
 previewArea.addEventListener('scroll', event => {
-	if (event.timeStamp - lastTimeStamp > 12) {
+	if (event.timeStamp - lastTimeStamp > 5) {
 		editor.scrollTop = previewArea.scrollTop / ratio;
 		lastTimeStamp = event.timeStamp;
 	}

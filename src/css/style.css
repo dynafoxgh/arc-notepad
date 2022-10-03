@@ -155,6 +155,12 @@ img {
 	font-size: var(--windowbar-fontsize);
 }
 
+#icon {
+	grid-area: icon;
+	align-items: center;
+	text-align: center;
+}
+
 #title {
 	grid-area: title;
 	align-items: center;
